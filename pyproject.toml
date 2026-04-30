@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "imdb"
+version = "0.1.0"
+description = "IMDB movie reviews classification"
+requires-python = ">=3.9"
+dependencies = [
+"transformers",    # Hugging Face models
+    "datasets",        # Hugging Face data loading
+    "nltk",            # Essential for stopwords/stemming
+    "beautifulsoup4",  # The gold standard for cleaning HTML
+    "evaluate",        # Easy metrics for NLP
+    "torch==2.11.0",   # Deep Learning
+    "pandas",          # Data Manipulation
+    "numpy",           # Math
+    "scikit-learn",    # Trees & Metrics
+    "pyyaml",          # Config management
+    "tqdm",            # Progress bars
+    "optuna",          # Hyperparameter Optimization
+    "mlflow",          # Experiment Tracking
+    "matplotlib",      # Visualization
+    "seaborn",         # Visualization
+    "fastapi",         # Deployment (API)
+    "uvicorn",         # Deployment (Server)
+    "pydantic",        # Data Validation
+    "structlog",       # Logging 
+    "xgboost",
+    "lightgbm",
+    "catboost",
+    "joblib",          # Model persistence
+    "shap",            # Interpretability
+    "accelerate",      # Efficient HF training loops
+    "sentencepiece",   # Required for many tokenizers
+    "scipy",           # Sparse matrix math
+    "ruff",            # High-performance linter/formatter
+    "pytest",          # Testing framework
+    "ipykernel",       # To run this environment in Jupyter/VS Code notebooks
+    "vaderSentiment"   # VANDER feature
+]
