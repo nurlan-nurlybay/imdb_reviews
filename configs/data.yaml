@@ -1,5 +1,6 @@
 paths:
   raw: "data/raw/IMDB Dataset.csv"
+  processed: "data/processed/imdb.parquet"
 
 data:
   target_col: "sentiment"
