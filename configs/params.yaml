@@ -1,0 +1,43 @@
+data:
+  target_col: "sentiment"
+
+experiment:
+  name: "imdb_sentiment_baseline"
+  n_trials: 20
+  random_state: 42
+  n_splits: 5
+
+tfidf:
+  max_features:
+    low: 5000
+    high: 20000
+    step: 1000     # Optuna will suggest_int with this step
+  ngram_range:
+    - [1, 1]
+    - [1, 2]       # Optuna will suggest_categorical from this list
+  use_idf: 
+    - True
+    - False
+
+catboost:
+  static:
+    loss_function: 'Logloss'
+    eval_metric: 'AUC'
+    task_type: 'GPU'       # Waking up the RTX 5060
+    devices: '0'           # Explicitly target the primary GPU
+    thread_count: 16       # UtilizingCPU threads for data feeding
+    verbose: 0
+
+  search_space:
+    iterations:
+      low: 200
+      high: 1500
+    depth:
+      low: 4
+      high: 10
+    learning_rate:
+      low: 0.01
+      high: 0.3
+    l2_leaf_reg:
+      low: 1.0
+      high: 10.0

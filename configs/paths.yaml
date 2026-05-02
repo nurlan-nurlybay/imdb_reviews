@@ -1,0 +1,11 @@
+data:
+  raw: "data/raw/IMDB Dataset.csv"
+  processed: "data/processed/imdb.parquet"
+  bert_embeddings: "data/processed/bert_embeddings.parquet"
+
+models:
+  best_tfidf: "models/best_tfidf_vectorizer.joblib"
+  best_catboost_baseline: "models/best_catboost_baseline.cbm"
+
+tracking:
+  mlflow_uri: "sqlite:///mlruns.db"
