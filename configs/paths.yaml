@@ -6,6 +6,14 @@ data:
 models:
   best_tfidf: "models/best_tfidf_vectorizer.joblib"
   best_catboost_baseline: "models/best_catboost_baseline.cbm"
+  best_catboost_production: "models/best_catboost_production.cbm"
+
+predictions:
+  baseline_oof: "data/processed/baseline_oof.parquet"
+  production_oof: "data/processed/production_oof.parquet"
+
+reports:
+  shap_summary: "reports/figures/shap_summary.png"
 
 tracking:
   mlflow_uri: "sqlite:///mlruns.db"

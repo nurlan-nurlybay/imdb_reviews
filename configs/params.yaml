@@ -1,11 +1,19 @@
 data:
   target_col: "sentiment"
+  meta_cols:
+    - "qm_density"
+    - "em_density"
+    - "uppercase_count"
+    - "vader_compound"
+    - "word_count"
+    - "TTR"
 
 experiment:
   name: "imdb_sentiment_baseline"
   n_trials: 20
   random_state: 42
   n_splits: 5
+  inner_splits: 3
 
 tfidf:
   max_features:
@@ -15,7 +23,7 @@ tfidf:
   ngram_range:
     - [1, 1]
     - [1, 2]       # Optuna will suggest_categorical from this list
-  use_idf: 
+  use_idf:
     - True
     - False
 
@@ -23,9 +31,8 @@ catboost:
   static:
     loss_function: 'Logloss'
     eval_metric: 'AUC'
-    task_type: 'GPU'       # Waking up the RTX 5060
-    devices: '0'           # Explicitly target the primary GPU
-    thread_count: 16       # UtilizingCPU threads for data feeding
+    task_type: 'CPU'
+    thread_count: -1       # Utilize all 96 CPU threads
     verbose: 0
 
   search_space:
@@ -41,3 +48,32 @@ catboost:
     l2_leaf_reg:
       low: 1.0
       high: 10.0
+
+bert:
+  model_name: "distilbert-base-uncased"
+  batch_size: 256
+  max_length: 256
+
+production:
+  name: "imdb_sentiment_production"
+  n_trials: 20
+  catboost:
+    static:
+      loss_function: 'Logloss'
+      eval_metric: 'AUC'
+      task_type: 'GPU'
+      devices: '0'
+      verbose: 0
+    search_space:
+      iterations:
+        low: 500
+        high: 3000
+      depth:
+        low: 4
+        high: 10
+      learning_rate:
+        low: 0.01
+        high: 0.3
+      l2_leaf_reg:
+        low: 1.0
+        high: 10.0
