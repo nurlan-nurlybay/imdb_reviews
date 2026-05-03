@@ -12,7 +12,7 @@ from typing import Dict, List, Optional
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold, cross_val_predict
 from sklearn.metrics import roc_auc_score
-
+import logging
 from imdb.utils.config import load_config
 from imdb.utils.logging import setup_logger
 
