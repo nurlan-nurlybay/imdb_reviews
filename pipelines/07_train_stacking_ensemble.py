@@ -1,6 +1,6 @@
 """
 Pipeline 07: Stacking Ensemble
-Blends OOF predictions from Level 0 models using a Logistic Regression Meta-Learner.
+Blends OOF predictions from Level 0 models using a Logistic Regression Meta-Learner (Nested CV).
 """
 import os
 import joblib
@@ -10,11 +10,12 @@ import structlog
 import mlflow
 from typing import Dict, List, Optional
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import StratifiedKFold, cross_val_predict
-from sklearn.metrics import roc_auc_score
+from sklearn.preprocessing import StandardScaler
 import logging
 from imdb.utils.config import load_config
 from imdb.utils.logging import setup_logger
+from imdb.training.cv import run_nested_cv
+from imdb.models.sklearn_wrapper import objective_logreg, fit_predict_logreg
 
 setup_logger("logs/07_train_stacking_ensemble.log", terminal_level=logging.INFO, file_level=logging.DEBUG)
 logger = structlog.get_logger(__name__)
@@ -65,35 +66,58 @@ def main() -> None:
         
     X = np.column_stack(X_list)
     
-    with mlflow.start_run(run_name="LogReg_MetaLearner"):
-        random_state = cfg_params.get("experiment", {}).get("random_state", 42)
-        n_splits = cfg_params.get("experiment", {}).get("n_splits", 5)
+    def bound_objective(trial, X_tr, y_tr):
+        return objective_logreg(trial, X_tr, y_tr)
         
-        meta_model = LogisticRegression(random_state=random_state)
-        cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=random_state)
-        
-        oof_preds = cross_val_predict(meta_model, X, y, cv=cv, method='predict_proba')[:, 1]
-        
-        ensemble_auc = float(roc_auc_score(y, oof_preds))
-        logger.info("ensemble_cv_done", auc=round(ensemble_auc, 4))
-        mlflow.log_metric("ensemble_nested_cv_auc", ensemble_auc)
-        
-        # Fit final model
-        meta_model.fit(X, y)
-        coef_dict = {feat: float(coef) for feat, coef in zip(feature_names, meta_model.coef_[0])}
-        logger.info("ensemble_weights", weights=coef_dict)
+    def bound_fit_predict(X_tr, y_tr, X_te, y_te, best_params):
+        return fit_predict_logreg(X_tr, y_tr, X_te, y_te, best_params)
+
+    # We use fewer trials (e.g. 15) because it's only 3 features, tuning happens quickly
+    n_trials = cfg_params.get("neural_classifiers", {}).get("n_trials", 20)
+    
+    oof_preds, best_overall_params, outer_metrics = run_nested_cv(
+        X=X,
+        y=y,
+        objective_fn=bound_objective,
+        fit_predict_fn=bound_fit_predict,
+        n_splits=cfg_params.get("experiment", {}).get("n_splits", 5),
+        n_trials=n_trials,
+        random_state=cfg_params.get("experiment", {}).get("random_state", 42),
+        direction="maximize",
+        mlflow_run_name="Nested_CV_Ensemble"
+    )
+    
+    # Fit final model on 100% of data
+    scaler = StandardScaler()
+    X_s = scaler.fit_transform(X)
+    
+    meta_model = LogisticRegression(
+        penalty='elasticnet', 
+        solver='saga', 
+        C=best_overall_params["C"], 
+        l1_ratio=best_overall_params["l1_ratio"], 
+        max_iter=1000, 
+        random_state=cfg_params.get("experiment", {}).get("random_state", 42),
+        n_jobs=-1
+    )
+    
+    meta_model.fit(X_s, y)
+    coef_dict = {feat: float(coef) for feat, coef in zip(feature_names, meta_model.coef_[0])}
+    logger.info("ensemble_weights", weights=coef_dict)
+    
+    with mlflow.start_run(run_name="LogReg_MetaLearner_Final"):
         mlflow.log_params(coef_dict)
-        
-        # Save OOF
-        oof_df = pd.DataFrame({"oof_prob": oof_preds, "label": y})
-        out_oof = cfg_paths.get("predictions", {}).get("ensemble_oof", "data/processed/ensemble_oof.parquet")
-        os.makedirs(os.path.dirname(out_oof), exist_ok=True)
-        oof_df.to_parquet(out_oof, index=False)
-        
-        # Save Model
-        out_model = cfg_paths.get("models", {}).get("best_ensemble", "models/best_ensemble.joblib")
-        os.makedirs(os.path.dirname(out_model), exist_ok=True)
-        joblib.dump(meta_model, out_model)
+    
+    # Save OOF
+    oof_df = pd.DataFrame({"oof_prob": oof_preds, "label": y})
+    out_oof = cfg_paths.get("predictions", {}).get("ensemble_oof", "data/processed/ensemble_oof.parquet")
+    os.makedirs(os.path.dirname(out_oof), exist_ok=True)
+    oof_df.to_parquet(out_oof, index=False)
+    
+    # Save Model
+    out_model = cfg_paths.get("models", {}).get("best_ensemble", "models/best_ensemble.joblib")
+    os.makedirs(os.path.dirname(out_model), exist_ok=True)
+    joblib.dump(meta_model, out_model)
 
     logger.info("pipeline_done", pipeline="07_train_stacking_ensemble")
 

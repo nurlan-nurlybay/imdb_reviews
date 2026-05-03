@@ -42,13 +42,14 @@ def objective_mlp(trial: optuna.Trial, X_train: np.ndarray, y_train: np.ndarray,
     n_units = trial.suggest_categorical("n_units", ss["n_units"])
     dropout = trial.suggest_float("dropout", float(ss["dropout"]["low"]), float(ss["dropout"]["high"]))
     lr = trial.suggest_float("lr", float(ss["lr"]["low"]), float(ss["lr"]["high"]), log=True)
+    weight_decay = trial.suggest_float("weight_decay", float(ss["weight_decay"]["low"]), float(ss["weight_decay"]["high"]), log=True)
     
     batch_size = ss["batch_size"]
     epochs = ss["epochs"]
     patience = ss["patience"]
     
     model = DynamicMLP(X_train.shape[1], n_layers, n_units, dropout).to(device)
-    optimizer = optim.AdamW(model.parameters(), lr=lr)
+    optimizer = optim.AdamW(model.parameters(), lr=lr, weight_decay=weight_decay)
     criterion = nn.BCEWithLogitsLoss()
     
     best_auc = 0.0
@@ -100,7 +101,7 @@ def fit_predict_mlp(X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray
     epochs = ss["epochs"]
     
     model = DynamicMLP(X_train.shape[1], best_params["n_layers"], best_params["n_units"], best_params["dropout"]).to(device)
-    optimizer = optim.AdamW(model.parameters(), lr=best_params["lr"])
+    optimizer = optim.AdamW(model.parameters(), lr=best_params["lr"], weight_decay=best_params["weight_decay"])
     criterion = nn.BCEWithLogitsLoss()
     
     for epoch in range(epochs):
@@ -136,7 +137,7 @@ def train_full_mlp(X: np.ndarray, y: np.ndarray, best_params: dict[str, Any], cf
     epochs = ss["epochs"]
     
     model = DynamicMLP(X.shape[1], best_params["n_layers"], best_params["n_units"], best_params["dropout"]).to(device)
-    optimizer = optim.AdamW(model.parameters(), lr=best_params["lr"])
+    optimizer = optim.AdamW(model.parameters(), lr=best_params["lr"], weight_decay=best_params["weight_decay"])
     criterion = nn.BCEWithLogitsLoss()
     
     for epoch in range(epochs):

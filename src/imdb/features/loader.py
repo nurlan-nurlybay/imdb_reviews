@@ -11,12 +11,13 @@ import structlog
 
 logger = structlog.get_logger(__name__)
 
-def load_scaled_bert_and_meta(
+def load_bert_and_meta(
     cfg_paths: dict[str, Any],
     cfg_params: dict[str, Any]
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Loads BERT embeddings and meta features, scales them, and returns (X, y).
+    Loads BERT embeddings and meta features and returns (X, y).
+    Note: Features are NOT scaled here to prevent leakage; scale inside CV.
     """
     logger.info("loading_data")
     df_meta = pd.read_parquet(cfg_paths["data"]["processed"])

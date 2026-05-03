@@ -9,7 +9,7 @@ import mlflow
 import logging
 from imdb.utils.config import load_config
 from imdb.utils.logging import setup_logger
-from imdb.features.loader import load_scaled_bert_and_meta
+from imdb.features.loader import load_bert_and_meta
 from imdb.models.pytorch_mlp import objective_mlp, fit_predict_mlp, train_full_mlp
 from imdb.training.cv import run_nested_cv
 
@@ -27,7 +27,7 @@ def main() -> None:
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     logger.info("device", device=str(device))
     
-    X, y = load_scaled_bert_and_meta(cfg_paths, cfg_params)
+    X, y = load_bert_and_meta(cfg_paths, cfg_params)
     
     def bound_objective(trial, X_tr, y_tr):
         return objective_mlp(trial, X_tr, y_tr, cfg_params, device)

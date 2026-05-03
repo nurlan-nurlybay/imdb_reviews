@@ -9,7 +9,7 @@ import mlflow
 import logging
 from imdb.utils.config import load_config
 from imdb.utils.logging import setup_logger
-from imdb.features.loader import load_scaled_bert_and_meta
+from imdb.features.loader import load_bert_and_meta
 from imdb.models.sklearn_wrapper import objective_logreg, fit_predict_logreg
 from imdb.training.cv import run_nested_cv
 from sklearn.linear_model import LogisticRegression
@@ -27,7 +27,7 @@ def main() -> None:
     mlflow.set_experiment(cfg_params["neural_classifiers"]["name"] + "_logreg")
     
     # Pre-processed data handling offloaded to src/imdb/features/loader.py
-    X, y = load_scaled_bert_and_meta(cfg_paths, cfg_params)
+    X, y = load_bert_and_meta(cfg_paths, cfg_params)
     
     def bound_objective(trial, X_tr, y_tr):
         return objective_logreg(trial, X_tr, y_tr)
