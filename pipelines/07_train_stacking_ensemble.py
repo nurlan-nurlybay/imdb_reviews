@@ -30,9 +30,9 @@ def main() -> None:
     
     # We only stack models that provide diverse errors
     oof_paths: Dict[str, str] = {
-        "Baseline (CatBoost+IDF)": cfg_paths.get("predictions", {}).get("baseline_oof", "data/processed/baseline_oof.parquet"),
-        "MLP (DistilBERT)": cfg_paths.get("predictions", {}).get("mlp_meta_bert_oof", "data/processed/mlp_meta_bert_oof.parquet"),
-        "LogReg (DistilBERT)": cfg_paths.get("predictions", {}).get("logreg_meta_bert_oof", "data/processed/logreg_meta_bert_oof.parquet"),
+        "Baseline_CatBoost_IDF": cfg_paths.get("predictions", {}).get("baseline_oof", "data/processed/baseline_oof.parquet"),
+        "MLP_DistilBERT": cfg_paths.get("predictions", {}).get("mlp_meta_bert_oof", "data/processed/mlp_meta_bert_oof.parquet"),
+        "LogReg_DistilBERT": cfg_paths.get("predictions", {}).get("logreg_meta_bert_oof", "data/processed/logreg_meta_bert_oof.parquet"),
     }
     
     dfs: Dict[str, pd.DataFrame] = {}
