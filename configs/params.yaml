@@ -77,3 +77,52 @@ production:
       l2_leaf_reg:
         low: 1.0
         high: 10.0
+
+neural_classifiers:
+  name: "imdb_sentiment_neural"
+  n_trials: 20
+  logreg:
+    C:
+      low: 1e-4
+      high: 1e2
+    l1_ratio:
+      low: 0.0
+      high: 1.0
+  mlp:
+    n_layers:
+      low: 1
+      high: 3
+    n_units: [16, 32, 64, 128, 256, 512]
+    dropout:
+      low: 0.1
+      high: 0.6
+    lr:
+      low: 1e-5
+      high: 1e-2
+    batch_size: 2048
+    epochs: 100
+    patience: 10
+
+meta_only:
+  name: "imdb_sentiment_meta_only"
+  n_trials: 20
+  catboost:
+    static:
+      loss_function: 'Logloss'
+      eval_metric: 'AUC'
+      task_type: 'CPU'
+      thread_count: -1
+      verbose: 0
+    search_space:
+      iterations:
+        low: 200
+        high: 1500
+      depth:
+        low: 4
+        high: 8
+      learning_rate:
+        low: 0.01
+        high: 0.3
+      l2_leaf_reg:
+        low: 1.0
+        high: 10.0

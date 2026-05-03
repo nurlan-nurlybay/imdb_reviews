@@ -1,19 +1,24 @@
 data:
   raw: "data/raw/IMDB Dataset.csv"
   processed: "data/processed/imdb.parquet"
-  bert_embeddings: "data/processed/bert_embeddings.parquet"
+  bert_embeddings: "data/processed/bert_head_tail_embeddings.parquet"
 
 models:
   best_tfidf: "models/best_tfidf_vectorizer.joblib"
   best_catboost_baseline: "models/best_catboost_baseline.cbm"
   best_catboost_production: "models/best_catboost_production.cbm"
+  best_logreg: "models/best_logreg.joblib"
+  best_mlp: "models/best_mlp.pt"
+
+  best_catboost_meta_only: "models/best_catboost_meta_only.cbm"
 
 predictions:
   baseline_oof: "data/processed/baseline_oof.parquet"
   production_oof: "data/processed/production_oof.parquet"
 
 reports:
-  shap_summary: "reports/figures/shap_summary.png"
+  shap_summary_baseline: "reports/figures/shap_summary_baseline.png"
+  shap_summary_meta_only: "reports/figures/shap_summary_meta_only.png"
 
 tracking:
   mlflow_uri: "sqlite:///mlruns.db"

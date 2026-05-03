@@ -47,7 +47,7 @@ def main() -> None:
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     logger.info("device", device=str(device))
     if torch.cuda.is_available():
-        logger.info("gpu", name=torch.cuda.get_device_name(0), vram_gb=round(torch.cuda.get_device_properties(0).total_mem / 1e9, 1))
+        logger.info("gpu", name=torch.cuda.get_device_name(0), vram_gb=round(torch.cuda.get_device_properties(0).total_memory / 1e9, 1))
 
     df = pd.read_parquet(cfg_paths["data"]["processed"])
     meta_cols: list[str] = cfg_params["data"]["meta_cols"]
